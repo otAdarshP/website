@@ -43,7 +43,6 @@ public class CategoryController {
         }
         catch (ResponseStatusException exception){
             return new ResponseEntity<>(exception.getReason(), exception.getStatusCode());
-
         }
     }
 
@@ -57,9 +56,4 @@ public class CategoryController {
             return new ResponseEntity<>(exception.getReason(), exception.getStatusCode());
         }
     }
-
-
-
-
-
 }
