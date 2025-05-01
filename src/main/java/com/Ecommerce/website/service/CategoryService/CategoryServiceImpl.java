@@ -1,6 +1,8 @@
 package com.Ecommerce.website.service.CategoryService;
 
 import com.Ecommerce.website.Model.Category;
+import com.Ecommerce.website.repositories.CategoryRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,25 +14,29 @@ import java.util.Optional;
 @Service
 public class CategoryServiceImpl implements CategoryService{
 
-    private List<Category> categories = new ArrayList<>();
+//    private List<Category> categories = new ArrayList<>();
+    @Autowired
+    private CategoryRepository categoryRepository;
     private Long nextId = 1L;
 
     // Initially it is empty, but as called by the Controller, it creates categories and then shows those categories as called by the Controller.
 
     @Override
     public void createCategory(Category category) {
-        category.setCategoryId(nextId++); // automatically providing id to the category
-        categories.add(category);
+//        category.setCategoryId(nextId++); // automatically providing id to the category
+        categoryRepository.save(category);
 
     }
 
     @Override
     public ArrayList<Category> allcategories() {
-        return (ArrayList<Category>) categories;
+
+        return (ArrayList<Category>) categoryRepository.findAll();
     }
 
     @Override
     public String deleteCategory(Long categoryId) {
+        List<Category> categories = categoryRepository.findAll();
         Category category = categories.stream() // list is converted into stream
 //                for category, check if the categoryId matches the category given in the requirement.
                 .filter(c-> c.getCategoryId().equals(categoryId)) // filter is applied on the stream
@@ -43,17 +49,11 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public Category updateCategory(Category category, Long categoryId) {
-        Optional<Category> optionalCategory = categories.stream()
-                .filter(c -> c.getCategoryId().equals(categoryId))
-                .findFirst();
-
-        if (optionalCategory.isPresent()){
-            Category existingCategory = optionalCategory.get();
-            existingCategory.setCategoryName(category.getCategoryName());
-            return existingCategory;
-        }
-        else{
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found.");
-        }
+        Optional<Category> savedCategoryOptional = categoryRepository.findById(categoryId);
+        Category savedCategory = savedCategoryOptional
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
+        Category.setCategoryId(category.getCategoryId());
+        savedCategory = categoryRepository.save(category);
+        return savedCategory;
     }
 }
